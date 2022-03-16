@@ -1,0 +1,297 @@
+\documentclass[10pt, answers]{exam} 
+%\documentclass[12pt, addpoints, answers]{exam} 
+%\addpoints
+%\noaddpoints
+%\answers
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+%\lstset
+%{ %Formatting for code in appendix
+%    language=c,
+%    basicstyle=\footnotesize,
+%    numbers=left,
+%    stepnumber=1,
+%    showstringspaces=false,
+%    tabsize=1,
+%    breaklines=true,
+%    breakatwhitespace=false,
+%}
+
+\usepackage{courier}
+\lstset{
+    language=C,
+    basicstyle=\footnotesize,
+    numbers=left,
+    stepnumber=1,
+%    showstringspaces=false,
+%    tabsize=1,
+%   breaklines=true,
+    breakatwhitespace=false,    
+%    basicstyle=\footnotesize\ttfamily, % Default font
+    % numbers=left,              % Location of line numbers
+    numberstyle=\tiny,          % Style of line numbers
+    % stepnumber=2,              % Margin between line numbers
+    numbersep=5pt,              % Margin between line numbers and text
+%    tabsize=2,                  % Size of tabs
+    extendedchars=true,
+    breaklines=true,            % Lines will be wrapped
+%    keywordstyle=\color{red},
+    frame=b,
+    % keywordstyle=[1]\textbf,
+    % keywordstyle=[2]\textbf,
+    % keywordstyle=[3]\textbf,
+    % keywordstyle=[4]\textbf,   \sqrt{\sqrt{}}
+%    stringstyle=\color{white}\ttfamily, % Color of strings
+    stringstyle=\ttfamily, % Color of strings
+    showspaces=false,
+    showtabs=false,
+    xleftmargin=17pt,
+    framexleftmargin=17pt,
+    framexrightmargin=5pt,
+    framexbottommargin=4pt,
+    % backgroundcolor=\color{lightgray},
+    showstringspaces=true
+}
+%%%\lstloadlanguages{ % Check documentation for further languages ...
+%%%     % [Visual]Basic,
+%%%     % Pascal,
+%%%     C,
+%%%     C++,
+%%%     % XML,
+%%%     % HTML,
+%%%     Java
+%%%}
+% \DeclareCaptionFont{blue}{\color{blue}} 
+
+% \captionsetup[lstlisting]{singlelinecheck=false, labelfont={blue}, textfont={blue}}
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox[cmyk]{0.43, 0.35, 0.35,0.01}{\parbox{\textwidth}{\hspace{15pt}#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
+
+
+
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{multirow}
+
+
+\newcommand{\coursename}{Advanced Operating Systems}
+\newcommand{\semester}{Spring 2022}
+\newcommand{\hwtitle}{HW\#1}
+\newcommand{\studentname}{CHUANG, CHIA-CHUN}
+\newcommand{\studentID}{CBB107045}
+
+\newcommand{\answer}{\\~\textbf{Answer:}\space}
+
+\pagestyle{head} 
+\pagestyle{headandfoot}
+\extraheadheight{1in}
+\firstpageheader{}
+{\begin{large}\hwtitle \\
+\coursename, \semester\end{large}\\~\\
+\studentname\space(\studentID)\\
+Department of Computer Science and Information Engineering\\
+National Pingtung University}
+{}
+%\runningheadrule 
+%\runningheader{}{}{}
+\setlength\answerlinelength{2in}
+\unframedsolutions
+
+\begin{document}
+%\noindent This homework is from Chapter 5 of OSTEP.
+
+\begin{questions} 
+\setcounter{question}{0} 
+
+\question 
+Write a program that calls fork(). Before calling fork(), have the
+main process access a variable (e.g., x) and set its value to something (e.g., 100). What value is the variable in the child process?
+What happens to the variable when both the child and parent change
+the value of x?
+
+\begin{solution}
+Please refer to List 1 (q1.c) and its execution results are as follows:
+
+\begin{lstlisting}[language=bash]
+$ cc 5-1.c
+$ ./a.out
+set    x = 111, (pid:8659)
+parent x = 111 (pid:8659)
+parent after changed x = 333 (pid:8659)
+child  x = 111 (pid:8660)
+child after changed x = 222 (pid:8660)
+
+$
+\end{lstlisting}
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q1.c]{q1.c}
+
+In Line 7, we have declared a variable $x$ with value 111. As we can see that in Lines 13-17 and 18-22 show the code for the child process and the parent process, respectively. In Lines 14and 19, we print out the value of x for the child and the parent process, which both are 111(as shown in lines 4 and 6 of the execution results). It is because the child process is created with the same content of the parent -- including the data segment as well as the stack. Later, in Lines 15 and 20, we changed the values of x in the child and the parent to 222 and 333, respectively. We also print out the changed values in Lines 16 and 21, which are 222 and 333. This can be shown that the forked child process has the same contents of its parent at the time it was created. However, after that, the child and the parent are two independent processes.
+
+
+
+
+
+
+
+\end{solution}
+
+
+\question
+Write a program that opens a file (with the open() system call) and then calls fork() to create a new process. Can both the child and parent access the file descriptor returned by open()? What happens when they are writing to the file concurrently, i.e., at the same time?
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-2.c
+$ ./a.out
+$ cat 5.2.txt
+parent come here to check
+child wrote something here
+$
+\end{lstlisting}
+\end{solution}
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q2.c]{q2.c}
+
+We opened the 5.2.txt text file on line 9 as the file required by the title, As we can see that in Lines 16-19 and 20-25 show the code for the child process and the parent process, respectively. In lines 17and 21 are the text we are going to write into the file, and do the writing action at lines 18 and 22. As shown in lines 4 and 5 of the execution results ,child and parent access can open to the file, it can be seen that Both child and parent access can perform write actions at the same time.
+\\
+
+
+
+\question
+Write another program using fork(). The child process should print “hello”; the parent process should print “goodbye”. You should try to ensure that the child process always prints first; can you do this without calling wait() in the parent?
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-3.c
+$ ./a.out
+hello
+goodbye
+$
+\end{lstlisting}
+\end{solution}
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q3.c]{q3.c}
+
+In Line 6, we use the vfork() formula. vfork is mainly used to ensure that the child process runs first, and the parent process can be scheduled to run after it calls exec or exit. As we can see that in Lines 11- 14 and 15-17 show the code for the child process and the parent process, respectively. We add exit to the subroutine line 13 to end the vfork and can see in the execution result lines 3 and 4 that the child process is more successful than the parent process to execute early
+\\
+
+
+\question
+Write a program that calls fork() and then calls some form of exec() to run the program /bin/ls. See if you can try all of the variants of exec(), including (on Linux) execl(), execle(), execlp(), execv(), execvp(), and execvpe(). Why do you think there are so many variants of the same basic call?
+
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-4.c
+$ ./a.out
+anaconda-post.log  cbb105021  cbb108042  lib         mnt   run   tmp
+bin                cbb108010  dev        lib64       opt   sbin  usr
+boot               cbb108016  etc        lost+found  proc  srv   var
+cbb105014          cbb108038  home       media       root  sys
+$
+\end{lstlisting}
+\end{solution}
+
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q4.c]{q4.c}
+As we can see that in Lines 19- 41 and 42-44 show the code for the child process and the parent process, respectively. We try to use 6 different execl variants in the child process, such as the execution result lines 3-6 As shown in the row, all variants can be executed
+\\
+
+
+
+\question
+Write a program that calls fork() and then calls some form of exec() to run the program /bin/ls. See if you can try all of the variants of exec(), including (on Linux) execl(), execle(), execlp(), execv(), execvp(), and execvpe(). Why do you think there are so many variants of the same basic call?
+
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-5.c
+$ ./a.out
+childpid:17941 wc:-1 rc:0
+parentpid:17940 wc:17941 rc:17941
+$
+\end{lstlisting}
+\end{solution}
+
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q5.c]{q5.c}
+Declare a wc variable to store the return value of wait, As we can see that in Lines 14-16 and 17-19 show the code for the child process and the parent process, respectively. parent process use wait() to wait for the child process to return id, child process itself does not need to wait for fork return, so the wait value is -1 (the execution result lines 3 and 4 are visible)
+\\
+
+
+
+\question
+Write a slight modification of the previous program, this time using waitpid() instead of wait(). When would waitpid() be useful?
+
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-6.c
+$ ./a.out
+childpid:18829 wc:-1 rc:0
+parentpid:18828 wc:18829 rc:18829
+$
+\end{lstlisting}
+\end{solution}
+
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q6.c]{q6.c}
+We can see that in Lines 14-16 and 17-19 show the code for the child process and the parent process, respectively. According to the execution result lines 3 and 4, we can know that waitpid works when the process itself has a child process
+\\
+
+
+\question
+Write a program that creates a child process, and then in the child closes standard output (STDOUT FILENO). What happens if the child calls printf() to print some output after closing the descriptor?
+
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-7.c
+$ ./a.out
+$ ./a.out
+$
+$
+\end{lstlisting}
+\end{solution}
+
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q7.c]{q7.c}
+We can see that in Lines 12-15 show the code for the child process , According to the execution result nothing is printed out, we can know that child closes standard output (STDOUT FILENO). There is no way to print anything when it is closed
+\\
+
+\question
+Write a program that creates two children, and connects the standard output of one to the standard input of the other, using the pipe() system call.
+
+\begin{solution}
+Please check the following results:
+\begin{lstlisting}[language=bash]
+$ cc 5-8.c
+$ ./a.out
+child0 out (child input) in the child1
+$
+\end{lstlisting}
+\end{solution}
+
+
+And consider the following programs:\\
+\lstinputlisting[label=samplecode, caption=q8.c]{q8.c}
+Declare an array of pi in line 6 to distinguish two different child processes, line 7 can execute two different processes, line 14 declares a variable buf used to store strings, As we can see that in Lines 23 and 27-31 show the code for the child process and the other child process, respectively. In line 25, use puts to store the text to be output into buf and use gets in line 29, and line 30 outputs the content of the obtained string
+\\
+
+
+
+
+\end{questions}
+\end{document}
